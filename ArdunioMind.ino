@@ -5,6 +5,7 @@ int numbers[] = {0, 0, 0};
 int randomNumbers[] = {2, 5, 5};
 int guesses = 10;
 int ledValue;
+int limit = 9;
 const byte ledPin = 10;
 const byte interruptPin_number = 3;
 const byte interruptPin_index = 2;
@@ -19,14 +20,17 @@ void setup() {
   randomSeed(analogRead(0));
 
   randomNumbers[0] = random(2);
+  if (randomNumbers[0] == 2) {
+    limit = 5;
+  }
   while (true) {
-    randomNumbers[1] = random(5);
+    randomNumbers[1] = random(limit);
     if (randomNumbers[1] != randomNumbers[0]) {
       break;
     }
   }
   while (true) {
-    randomNumbers[2] = random(5);
+    randomNumbers[2] = random(limit);
     if (randomNumbers[2] != randomNumbers[0] && randomNumbers[2] != randomNumbers[1]) {
       break;
     }
@@ -91,13 +95,16 @@ void updateIndex() {
     lastInterrupt_index = millis();
   }
   else if (millis() - lastInterrupt_index > 200 ) {
+    guesses--;
+    setLCD();
     submit();
+
   }
 
 }
 void updateNumber() {
   if (millis() - lastInterrupt_number > 200) {
-    if (numbers[index - 1]++ > 4 || (index == 1 && numbers[0] > 2)) {
+    if (numbers[index - 1]++ > limit - 1 || (index == 1 && numbers[0] > 2)) {
       numbers[index - 1] = 0;
     }
     lastInterrupt_number = millis();
@@ -113,33 +120,33 @@ void submit() {
   for (int i = 0; i != 3; i++) {
     if (numbers[i] == temp[i]) {
       rCount ++;
-      temp[i] = 9;
+      temp[i] = 11;
     }
-    else if (numbers[i] == temp[0]) {
+  }
+  for (int i = 0; i != 3 ; i++) {
+    if (numbers[i] == temp[0]) {
       sCount++;
-      temp[0] = 9;
+      temp[0] = 11;
     }
     else if (numbers[i] == temp[1]) {
       sCount++;
-      temp[1] = 9;
+      temp[1] = 11;
     }
     else if (numbers[i] == temp[2]) {
       sCount++;
-      temp[2] = 9;
+      temp[2] = 11;
     }
-    else {
-      wCount++;
-      temp[i] = 9;
-    }
+
   }
-  if (guesses-- == 0) {
+  wCount = 3 - (rCount + sCount);
+  if (guesses < 1) {
     game(0);
   }
   else if (rCount == 3) {
     game(1);
   }
   else {
-    setLCD();
+
     lcd.setCursor(6, 1);
     lcd.setCursor(5, 1);
     lcd.print("R:");
@@ -151,6 +158,7 @@ void submit() {
     lcd.print("W:");
     lcd.print(wCount);
   }
+
 }
 
 void game(int state) {
