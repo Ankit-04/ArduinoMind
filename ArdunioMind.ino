@@ -95,8 +95,6 @@ void updateIndex() {
     lastInterrupt_index = millis();
   }
   else if (millis() - lastInterrupt_index > 200 ) {
-    guesses--;
-    setLCD();
     submit();
 
   }
@@ -139,6 +137,7 @@ void submit() {
 
   }
   wCount = 3 - (rCount + sCount);
+  guesses = guesses - 1;
   if (guesses < 1) {
     game(0);
   }
@@ -146,7 +145,7 @@ void submit() {
     game(1);
   }
   else {
-
+    setLCD();
     lcd.setCursor(6, 1);
     lcd.setCursor(5, 1);
     lcd.print("R:");
@@ -165,6 +164,10 @@ void game(int state) {
   lcd.clear();
   if (state == 0) {
     lcd.print("you lost");
+    lcd.setCursor(0,1);
+    lcd.print("value was:");
+    lcd.setCursor(12,1);
+    lcd.print(ledValue);
   }
   else {
     lcd.print("you win");
